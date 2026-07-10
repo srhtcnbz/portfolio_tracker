@@ -1,33 +1,30 @@
-/// Represents an aggregated portfolio asset holding and its market status.
+/// Category classification for portfolio allocation horizon.
+enum AssetHorizon {
+  longTerm('Long-term', 60.0),
+  midTerm('Mid-term', 30.0),
+  shortTerm('Short-term', 10.0);
+
+  final String label;
+  final double targetPercentage;
+  const AssetHorizon(this.label, this.targetPercentage);
+}
+
+/// Represents an asset holding in the portfolio with valuation in TL (₺).
 class PortfolioAsset {
   final String assetCode;
   final String name;
-  final double totalQuantity;
-  final double currentPrice;
-  final double averageCost;
-  final double dailyChangePercentage;
+  final double currentValueTl;
+  final double profitLossPercentage;
+  final AssetHorizon horizon;
 
   const PortfolioAsset({
     required this.assetCode,
     required this.name,
-    required this.totalQuantity,
-    required this.currentPrice,
-    required this.averageCost,
-    required this.dailyChangePercentage,
+    required this.currentValueTl,
+    required this.profitLossPercentage,
+    required this.horizon,
   });
 
-  /// Total current market value of this holding.
-  double get currentValue => totalQuantity * currentPrice;
-
-  /// Total cost basis of this holding.
-  double get totalCost => totalQuantity * averageCost;
-
-  /// Total absolute gain or loss.
-  double get totalGainLoss => currentValue - totalCost;
-
-  /// Percentage gain or loss relative to total cost.
-  double get totalGainLossPercentage {
-    if (totalCost == 0) return 0.0;
-    return (totalGainLoss / totalCost) * 100.0;
-  }
+  /// Whether this holding is currently in profit.
+  bool get isProfitable => profitLossPercentage >= 0;
 }
