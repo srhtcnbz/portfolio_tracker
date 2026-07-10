@@ -1,0 +1,11 @@
+{
+    "name": "portfolio_tracker",
+    "short_name": "portfolio_tracker",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#F8F9FA",
+    "theme_color": "#111827",
+    "description": "A minimalist investment tracking app built with Flutter.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}
