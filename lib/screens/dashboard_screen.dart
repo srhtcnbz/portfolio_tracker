@@ -3,11 +3,24 @@ import 'package:provider/provider.dart';
 import '../services/portfolio_service.dart';
 import '../widgets/macro_overview_card.dart';
 import '../widgets/portfolio_asset_tile.dart';
+import '../widgets/add_transaction_modal.dart';
+import 'asset_detail_screen.dart';
 
 /// Yatırım portföyü ana kontrol paneli ekranı.
 /// Provider ile PortfolioService üzerinden anlık verileri çeker.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
+
+  void _showAddModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) => const AddTransactionModal(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +56,8 @@ class DashboardScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF374151)),
-            onPressed: () {},
+            icon: const Icon(Icons.add_circle_outline, color: Color(0xFF111827)),
+            onPressed: () => _showAddModal(context),
           ),
           IconButton(
             icon: const Icon(Icons.more_horiz, color: Color(0xFF374151)),
@@ -112,7 +125,7 @@ class DashboardScreen extends StatelessWidget {
 
               // Varlık Listesi: ListView.builder yapısına denk SliverList (modern kart + ince divider)
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 36.0),
+                padding: const EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 80.0),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -123,7 +136,13 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           PortfolioAssetTile(
                             asset: asset,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AssetDetailScreen(asset: asset),
+                                ),
+                              );
+                            },
                           ),
                           if (!isLast)
                             const Padding(
@@ -144,6 +163,17 @@ class DashboardScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.add),
+        label: const Text(
+          'İşlem Ekle',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        onPressed: () => _showAddModal(context),
       ),
     );
   }
