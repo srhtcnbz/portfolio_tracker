@@ -42,14 +42,16 @@ jobs:
       - name: Analyze Flutter Code
         run: flutter analyze --no-fatal-infos || true
 
+      - name: Fix Gradle Wrapper Line Endings & Permissions
+        run: |
+          sed -i 's/\r//' android/gradlew
+          chmod +x android/gradlew
+
       - name: Build Release APK
         run: |
           flutter build apk --release
-          echo "=== Searching for APK files ==="
-          find . -name "*.apk" -type f 2>/dev/null
-          echo "=== Build output folder structure ==="
-          ls -la build/app/outputs/ 2>/dev/null || echo "build/app/outputs not found"
-          find build -name "*.apk" 2>/dev/null || echo "No APK found under build/"
+          echo "=== APK Search ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
