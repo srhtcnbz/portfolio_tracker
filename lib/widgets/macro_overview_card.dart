@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Allocation summary data model for a specific investment horizon.
+/// Yatırım ufku alokasyon veri modeli.
 class HorizonAllocation {
   final String label;
   final double targetPercentage;
@@ -16,17 +16,19 @@ class HorizonAllocation {
   });
 }
 
-/// A minimalist, high-end Macro Overview card showing total portfolio value in TL
-/// and the breakdown of Long-term (60%), Mid-term (30%), and Short-term (10%) targets vs actuals.
+/// Portföyün genel durumunu, dünkü değer değişimini (TL & %)
+/// ve hedef/gerçekleşen varlık dağılımını gösteren modern Macro Overview kartı.
 class MacroOverviewCard extends StatelessWidget {
   final double totalValueTl;
-  final double totalProfitLossPercentage;
+  final double dailyChangeAmountTl;
+  final double dailyChangePercentage;
   final List<HorizonAllocation> allocations;
 
   const MacroOverviewCard({
     super.key,
     required this.totalValueTl,
-    required this.totalProfitLossPercentage,
+    required this.dailyChangeAmountTl,
+    required this.dailyChangePercentage,
     required this.allocations,
   });
 
@@ -37,8 +39,8 @@ class MacroOverviewCard extends StatelessWidget {
       decimalDigits: 2,
       locale: 'tr_TR',
     );
-    final isPositive = totalProfitLossPercentage >= 0;
-    final badgeColor = isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
+    final isPositive = dailyChangeAmountTl >= 0;
+    final changeColor = isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
 
     return Container(
       width: double.infinity,
@@ -49,7 +51,7 @@ class MacroOverviewCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE5E7EB), width: 1.0),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Color(0x0A000000),
             blurRadius: 16,
             offset: Offset(0, 6),
           ),
@@ -58,7 +60,7 @@ class MacroOverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
+          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -80,14 +82,14 @@ class MacroOverviewCard extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.shield_outlined, size: 13, color: Color(0xFF4B5563)),
+                    Icon(Icons.insights, size: 13, color: Color(0xFF4B5563)),
                     SizedBox(width: 4),
                     Text(
-                      'TARGET vs ACTUAL',
+                      'CANLI TAKİP',
                       style: TextStyle(
                         fontSize: 10.0,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
                         color: Color(0xFF374151),
                       ),
                     ),
@@ -98,48 +100,51 @@ class MacroOverviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 16.0),
 
-          // Total Value & Return Badge
+          // Toplam Portföy Değeri
           Text(
             tlFormatter.format(totalValueTl),
             style: const TextStyle(
-              fontSize: 32.0,
+              fontSize: 34.0,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.8,
               color: Color(0xFF111827),
             ),
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 10.0),
+
+          // Dün'e göre toplam değişim (TL ve %)
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                 decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(6.0),
+                  color: changeColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       isPositive ? Icons.trending_up : Icons.trending_down,
-                      size: 14.0,
-                      color: badgeColor,
+                      size: 16.0,
+                      color: changeColor,
                     ),
-                    const SizedBox(width: 4.0),
+                    const SizedBox(width: 6.0),
                     Text(
-                      '${isPositive ? '+' : ''}${totalProfitLossPercentage.toStringAsFixed(2)}%',
+                      '${isPositive ? '+' : ''}${tlFormatter.format(dailyChangeAmountTl)} '
+                      '(${isPositive ? '+' : ''}${dailyChangePercentage.toStringAsFixed(2)}%)',
                       style: TextStyle(
-                        fontSize: 12.0,
+                        fontSize: 13.0,
                         fontWeight: FontWeight.w700,
-                        color: badgeColor,
+                        color: changeColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8.0),
+              const SizedBox(width: 10.0),
               const Text(
-                'Total Portfolio Return',
+                "Dün'e Göre Değişim",
                 style: TextStyle(
                   fontSize: 13.0,
                   color: Color(0xFF6B7280),
@@ -153,9 +158,9 @@ class MacroOverviewCard extends StatelessWidget {
           const Divider(color: Color(0xFFF3F4F6), height: 1),
           const SizedBox(height: 20.0),
 
-          // Allocation Section Header
+          // Hedef vs Gerçekleşen Dağılım Başlığı
           const Text(
-            'ALLOCATION STRATEGY',
+            'HEDEF vs GERÇEKLEŞEN DAĞILIM',
             style: TextStyle(
               fontSize: 11.0,
               fontWeight: FontWeight.w700,
@@ -165,7 +170,7 @@ class MacroOverviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 14.0),
 
-          // Allocation Breakdown Bars
+          // Allocation Rows
           ...allocations.map((item) => _buildAllocationRow(item)),
         ],
       ),
@@ -175,8 +180,8 @@ class MacroOverviewCard extends StatelessWidget {
   Widget _buildAllocationRow(HorizonAllocation item) {
     final diff = item.actualPercentage - item.targetPercentage;
     final diffText = diff >= 0
-        ? '+${diff.toStringAsFixed(1)}%'
-        : '${diff.toStringAsFixed(1)}%';
+        ? '+%${diff.toStringAsFixed(1)}'
+        : '-%${diff.abs().toStringAsFixed(1)}';
     final diffColor = diff >= 0 ? const Color(0xFF16A34A) : const Color(0xFFD97706);
 
     return Padding(
@@ -208,7 +213,7 @@ class MacroOverviewCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '(Target ${item.targetPercentage.toStringAsFixed(0)}%)',
+                    '(Hedef %${item.targetPercentage.toStringAsFixed(0)})',
                     style: const TextStyle(
                       fontSize: 12.0,
                       color: Color(0xFF9CA3AF),
@@ -219,7 +224,7 @@ class MacroOverviewCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '${item.actualPercentage.toStringAsFixed(1)}%',
+                    '%${item.actualPercentage.toStringAsFixed(1)}',
                     style: const TextStyle(
                       fontSize: 13.0,
                       fontWeight: FontWeight.w700,

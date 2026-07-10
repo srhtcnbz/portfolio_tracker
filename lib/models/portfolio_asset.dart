@@ -1,4 +1,4 @@
-/// Category classification for portfolio allocation horizon.
+/// Yatırım ufku (Long-term / Mid-term / Short-term) ve hedef oranları.
 enum AssetHorizon {
   longTerm('Long-term', 60.0),
   midTerm('Mid-term', 30.0),
@@ -9,22 +9,24 @@ enum AssetHorizon {
   const AssetHorizon(this.label, this.targetPercentage);
 }
 
-/// Represents an asset holding in the portfolio with valuation in TL (₺).
+/// Portföydeki tek bir varlığın detaylarını (fiyat, değişim, toplam değer) tutan model.
 class PortfolioAsset {
   final String assetCode;
   final String name;
-  final double currentValueTl;
-  final double profitLossPercentage;
+  final double currentPrice;
+  final double dailyChangePercent;
+  final double totalValue;
   final AssetHorizon horizon;
 
   const PortfolioAsset({
     required this.assetCode,
     required this.name,
-    required this.currentValueTl,
-    required this.profitLossPercentage,
+    required this.currentPrice,
+    required this.dailyChangePercent,
+    required this.totalValue,
     required this.horizon,
   });
 
-  /// Whether this holding is currently in profit.
-  bool get isProfitable => profitLossPercentage >= 0;
+  /// Günlük veya toplam kâr durumu.
+  bool get isProfitable => dailyChangePercent >= 0;
 }

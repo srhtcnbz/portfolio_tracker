@@ -3,73 +3,94 @@ import 'package:flutter/material.dart';
 import '../models/portfolio_asset.dart';
 import '../widgets/macro_overview_card.dart';
 
-/// Service managing portfolio holdings and calculating macro overview allocations.
+/// Gerçek BIST ve Global ETF verilerini simüle eden ve durumu yöneten servis.
 class PortfolioService extends ChangeNotifier {
   final List<PortfolioAsset> _assets = const [
     PortfolioAsset(
       assetCode: 'VOO',
       name: 'Vanguard S&P 500 ETF',
-      currentValueTl: 512000.00,
-      profitLossPercentage: 14.82,
+      currentPrice: 17450.00,
+      dailyChangePercent: 1.85,
+      totalValue: 512000.00,
       horizon: AssetHorizon.longTerm,
     ),
     PortfolioAsset(
       assetCode: 'QQQ',
       name: 'Invesco QQQ Trust',
-      currentValueTl: 288400.00,
-      profitLossPercentage: 18.40,
+      currentPrice: 16210.00,
+      dailyChangePercent: 2.40,
+      totalValue: 288400.00,
       horizon: AssetHorizon.longTerm,
     ),
     PortfolioAsset(
       assetCode: 'THYAO',
       name: 'Türk Hava Yolları',
-      currentValueTl: 210500.00,
-      profitLossPercentage: 6.15,
+      currentPrice: 312.50,
+      dailyChangePercent: 3.15,
+      totalValue: 210500.00,
       horizon: AssetHorizon.midTerm,
     ),
     PortfolioAsset(
       assetCode: 'ASELS',
       name: 'Aselsan Elektronik',
-      currentValueTl: 138000.00,
-      profitLossPercentage: -2.40,
+      currentPrice: 64.80,
+      dailyChangePercent: -1.20,
+      totalValue: 138000.00,
       horizon: AssetHorizon.midTerm,
     ),
     PortfolioAsset(
-      assetCode: 'ALTIN',
-      name: 'Gram Altın Fonu',
-      currentValueTl: 85600.00,
-      profitLossPercentage: 9.30,
+      assetCode: 'TUPRS',
+      name: 'Tüpraş',
+      currentPrice: 172.40,
+      dailyChangePercent: 0.95,
+      totalValue: 95000.00,
+      horizon: AssetHorizon.midTerm,
+    ),
+    PortfolioAsset(
+      assetCode: 'KCHOL',
+      name: 'Koç Holding',
+      currentPrice: 218.00,
+      dailyChangePercent: -0.60,
+      totalValue: 82000.00,
       horizon: AssetHorizon.shortTerm,
     ),
     PortfolioAsset(
-      assetCode: 'PPF',
-      name: 'Para Piyasası Fonu',
-      currentValueTl: 43000.00,
-      profitLossPercentage: 4.10,
+      assetCode: 'GLDTR',
+      name: 'Ziraat Altın ETF',
+      currentPrice: 2840.00,
+      dailyChangePercent: 1.10,
+      totalValue: 64000.00,
       horizon: AssetHorizon.shortTerm,
     ),
   ];
 
-  /// Unmodifiable list of assets.
+  /// Portföydeki tüm varlıkların salt okunur listesi.
   List<PortfolioAsset> get assets => List.unmodifiable(_assets);
 
-  /// Total current market valuation in Turkish Lira (₺).
+  /// Toplam portföy değeri (TL).
   double get totalValueTl {
-    return _assets.fold(0.0, (sum, asset) => sum + asset.currentValueTl);
+    return _assets.fold(0.0, (sum, asset) => sum + asset.totalValue);
   }
 
-  /// Total weighted profit/loss return percentage across the portfolio.
-  double get totalProfitLossPercentage {
-    if (_assets.isEmpty || totalValueTl == 0) return 0.0;
-    double weightedSum = 0.0;
-    for (final asset in _assets) {
-      final weight = asset.currentValueTl / totalValueTl;
-      weightedSum += asset.profitLossPercentage * weight;
-    }
-    return weightedSum;
+  /// Dün'e göre toplam günlük parasal değişim (TL).
+  double get dailyChangeAmountTl {
+    return _assets.fold(0.0, (sum, asset) {
+      // Varlığın dünkü değeri: totalValue / (1 + changePct/100)
+      final yesterdayValue = asset.totalValue / (1 + (asset.dailyChangePercent / 100));
+      return sum + (asset.totalValue - yesterdayValue);
+    });
   }
 
-  /// Calculates target vs actual percentage breakdown for Long/Mid/Short horizons.
+  /// Dün'e göre toplam günlük yüzde değişim (%).
+  double get dailyChangePercentage {
+    final totalNow = totalValueTl;
+    if (totalNow == 0) return 0.0;
+    final totalYesterday = totalNow - dailyChangeAmountTl;
+    if (totalYesterday == 0) return 0.0;
+    return ((totalNow - totalYesterday) / totalYesterday) * 100.0;
+  }
+
+  /// Hedef ile gerçekleşen alokasyon oranları (Long-term / Mid-term / Short-term).
   List<HorizonAllocation> get macroAllocations {
     final total = totalValueTl;
     if (total == 0) {
@@ -78,7 +99,7 @@ class PortfolioService extends ChangeNotifier {
           label: 'Long-term',
           targetPercentage: 60.0,
           actualPercentage: 0.0,
-          barColor: Color(0xFF1F2937),
+          barColor: Color(0xFF111827),
         ),
         HorizonAllocation(
           label: 'Mid-term',
@@ -102,13 +123,13 @@ class PortfolioService extends ChangeNotifier {
     for (final asset in _assets) {
       switch (asset.horizon) {
         case AssetHorizon.longTerm:
-          longTermSum += asset.currentValueTl;
+          longTermSum += asset.totalValue;
           break;
         case AssetHorizon.midTerm:
-          midTermSum += asset.currentValueTl;
+          midTermSum += asset.totalValue;
           break;
         case AssetHorizon.shortTerm:
-          shortTermSum += asset.currentValueTl;
+          shortTermSum += asset.totalValue;
           break;
       }
     }
