@@ -7,6 +7,6 @@
     </style>
     <!-- Theme to apply after the launch screen is dismissed. -->
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
-        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 </resources>
