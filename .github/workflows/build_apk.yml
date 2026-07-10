@@ -31,11 +31,6 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Generate Gradle Wrapper
-        run: |
-          cd android
-          gradle wrapper --gradle-version 8.4
-
       - name: Build Release APK
         run: flutter build apk --release
 
